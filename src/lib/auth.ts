@@ -9,7 +9,7 @@ export type User = { id: string; username: string; avatar_url: string | null; ro
 export const supabaseEnabled = !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 /** Local development without Supabase: sign in with just a name. Never on in production. */
 export const devAuthEnabled = !supabaseEnabled && process.env.NODE_ENV !== 'production';
-export const DEV_COOKIE = 'redref_dev_user';
+export const DEV_COOKIE = 'redmdev_dev_user';
 
 export async function supabaseServer() {
   const store = await cookies();
@@ -23,7 +23,7 @@ export async function supabaseServer() {
 
 /** uuid-shaped id derived from a dev username so the same name maps to the same profile. */
 const devId = (name: string) => {
-  const h = createHash('sha1').update('redref-dev:' + name.toLowerCase()).digest('hex');
+  const h = createHash('sha1').update('redmdev-dev:' + name.toLowerCase()).digest('hex');
   return `${h.slice(0, 8)}-${h.slice(8, 12)}-5${h.slice(13, 16)}-a${h.slice(17, 20)}-${h.slice(20, 32)}`;
 };
 

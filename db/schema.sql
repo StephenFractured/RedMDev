@@ -1,4 +1,4 @@
--- RedRef schema. Runs on Supabase (Postgres 15+) or plain Postgres.
+-- RedMDev schema. Runs on Supabase (Postgres 15+) or plain Postgres.
 create extension if not exists pg_trgm;
 
 -- ---------- Natives ----------

@@ -1,4 +1,4 @@
-# RedRef
+# RedMDev
 
 A reference site for RedM developers: every RDR3 native plus the whole
 [rdr3_discoveries](https://github.com/femga/rdr3_discoveries) dictionary, with one search box,

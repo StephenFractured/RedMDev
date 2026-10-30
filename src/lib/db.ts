@@ -2,7 +2,7 @@ import 'server-only';
 import postgres from 'postgres';
 
 const g = globalThis as unknown as { __sql?: postgres.Sql };
-export const sql = g.__sql ?? postgres(process.env.DATABASE_URL ?? 'postgres://postgres@localhost:5432/redref', {
+export const sql = g.__sql ?? postgres(process.env.DATABASE_URL ?? 'postgres://postgres@localhost:5432/redmdev', {
   max: 10, prepare: false, onnotice: () => {},
 });
 if (process.env.NODE_ENV !== 'production') g.__sql = sql;
