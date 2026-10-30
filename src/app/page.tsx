@@ -1,103 +1,85 @@
-import Image from "next/image";
+import Link from 'next/link';
+import { sql } from '@/lib/db';
+import { recentPosts } from '@/lib/posts';
+import { categoryTree } from '@/lib/discoveries';
+import { categoryHref, nativeHref } from '@/lib/links';
 
-export default function Home() {
+export const revalidate = 60;
+
+export default async function Home() {
+  const [[stats], tree, recent] = await Promise.all([
+    sql<{ natives: number; named: number; rows: number; posts: number }[]>`
+      select (select count(*) from natives)::int natives, (select count(*) from natives where is_named)::int named,
+             (select coalesce(sum(row_count),0) from datasets)::int rows, (select count(*) from posts where not hidden)::int posts`,
+    categoryTree(),
+    recentPosts(8),
+  ]);
+  const top = tree.filter(c => !c.parent_path);
+  const popular = ['AI/CPED_CONFIG_FLAGS', 'animations/ingameanims', 'useful_info_from_rpfs/textures/blips', 'clothes', 'peds', 'doorHashes', 'weapons', 'Controls']
+    .map(p => tree.find(t => t.path === p)).filter(Boolean) as typeof tree;
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="space-y-10">
+      <section className="pt-6 text-center">
+        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">RedM natives and discoveries, in one place</h1>
+        <p className="mx-auto mt-3 max-w-2xl text-muted">
+          Look up any RDR3 native, every flag, anim, model and texture from rdr3_discoveries, and the examples other developers have shared.
+        </p>
+        <form action="/search" className="mx-auto mt-6 flex max-w-2xl gap-2">
+          <input name="q" autoFocus placeholder="Search natives, hashes, flags, anims, models…"
+            className="min-w-0 flex-1 rounded-lg border border-border bg-panel px-4 py-3 outline-none focus:border-accent" />
+          <button className="rounded-lg bg-accent px-5 font-medium text-accent-fg">Search</button>
+        </form>
+        <p className="mt-3 text-sm text-muted">
+          {stats.natives.toLocaleString()} natives ({stats.named.toLocaleString()} named) · {stats.rows.toLocaleString()} discovery rows · {stats.posts.toLocaleString()} community posts
+        </p>
+      </section>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      <section>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted">Jump to</h2>
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          <Link href="/natives" className="rounded-lg border border-border bg-panel p-3 hover:border-accent">
+            <div className="font-medium">All natives</div><div className="text-xs text-muted">Browse by namespace</div>
+          </Link>
+          {popular.map(c => (
+            <Link key={c.path} href={categoryHref(c.path)} className="rounded-lg border border-border bg-panel p-3 hover:border-accent">
+              <div className="font-medium">{c.title}</div><div className="truncate text-xs text-muted">{c.path}</div>
+            </Link>
+          ))}
+          <Link href="/tools/hash" className="rounded-lg border border-border bg-panel p-3 hover:border-accent">
+            <div className="font-medium">Hash tool</div><div className="text-xs text-muted">joaat, hex, signed, unsigned</div>
+          </Link>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </section>
+
+      <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
+        <section>
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted">Discoveries</h2>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {top.map(c => (
+              <Link key={c.path} href={categoryHref(c.path)} className="flex items-baseline justify-between rounded-md border border-border bg-panel px-3 py-2 hover:border-accent">
+                <span>{c.title}</span>
+                <span className="text-xs text-muted">{tree.filter(t => t.path.startsWith(c.path + '/')).length || ''}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+        <section>
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted">Latest from the community</h2>
+          {recent.length === 0 && <p className="text-sm text-muted">No posts yet. Open any native or discovery page and add the first example.</p>}
+          <ul className="space-y-2">
+            {recent.map(p => (
+              <li key={p.id}>
+                <Link href={(p.target_type === 'native' ? nativeHref(p.target_id) : categoryHref(p.target_id)) + `#post-${p.id}`}
+                  className="block rounded-md border border-border bg-panel px-3 py-2 hover:border-accent">
+                  <div className="text-xs text-muted">{p.username} · {p.kind === 'example' ? 'example on' : 'comment on'} <span className="mono">{p.target_label}</span></div>
+                  <div className="line-clamp-2 text-sm">{p.title || p.body_md.replace(/```\w*/g, '')}</div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
     </div>
   );
 }
