@@ -2,9 +2,9 @@ import 'server-only';
 import postgres from 'postgres';
 
 const g = globalThis as unknown as { __sql?: postgres.Sql };
-export const sql = g.__sql ?? postgres(process.env.DATABASE_URL ?? 'postgres://postgres@localhost:5432/redmdev', {
-  max: 10, prepare: false, onnotice: () => {},
-});
+const url = process.env.DATABASE_URL ?? 'postgres://postgres@localhost:5432/redmdev';
+const local = /@(localhost|127\.0\.0\.1)[:/]/.test(url);
+export const sql = g.__sql ?? postgres(url, { max: 10, prepare: false, onnotice: () => {}, ssl: local ? false : 'require' });
 if (process.env.NODE_ENV !== 'production') g.__sql = sql;
 
 export type NativeRow = {
