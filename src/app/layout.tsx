@@ -40,11 +40,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </div>
         </header>
         <main className="mx-auto max-w-7xl px-4 py-6">{children}</main>
-        <footer className="mx-auto max-w-7xl px-4 py-10 text-xs text-muted">
-          Natives from <a className="underline" href="https://github.com/VORPCORE/RDR3natives">VORPCORE/RDR3natives</a> and{' '}
-          <a className="underline" href="https://github.com/alloc8or/rdr3-nativedb-data">alloc8or&apos;s native DB</a>. Discoveries from{' '}
-          <a className="underline" href="https://github.com/femga/rdr3_discoveries">femga/rdr3_discoveries</a> and its contributors.
-        </footer>
       </body>
     </html>
   );
