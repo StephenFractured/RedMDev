@@ -21,8 +21,8 @@ export default function HashTool({ initial }: { initial: string }) {
                 <tr key={i}>
                   <td className="mono px-3 py-1.5">{l}</td>
                   <td className="px-3 py-1.5 text-xs text-muted">{parsed !== null ? 'number' : 'joaat(name)'}</td>
-                  {[toHex(u), String(toSigned(u)), String(toUnsigned(u))].map(v => (
-                    <td key={v} className="mono px-3 py-1.5"><span className="mr-1.5">{v}</span><CopyButton text={v} /></td>
+                  {[toHex(u), String(toSigned(u)), String(toUnsigned(u))].map((v, j) => (
+                    <td key={j} className="mono px-3 py-1.5"><span className="mr-1.5">{v}</span><CopyButton text={v} /></td>
                   ))}
                   <td className="px-3 py-1.5"><Link className="text-xs text-accent underline" href={`/search?q=${encodeURIComponent(toHex(u))}`}>Find</Link></td>
                 </tr>
